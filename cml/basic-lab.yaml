@@ -1,0 +1,335 @@
+lab:
+  description: GD bnas
+  notes: ''
+  timestamp: 1602958920.5244126
+  title: basic-lab
+  version: 0.0.3
+nodes:
+  - id: n0
+    label: 10.208.253
+    node_definition: external_connector
+    x: -750
+    y: 0
+    configuration: bridge0
+    tags: []
+    interfaces:
+      - id: i0
+        slot: 0
+        label: port
+        type: physical
+  - id: n1
+    label: jump
+    node_definition: ubuntu
+    x: -600
+    y: 0
+    configuration: |-
+      #cloud-config
+      password: cisco
+      chpasswd: { expire: False }
+      hostname: jh
+      ssh_pwauth: True
+      ssh_authorized_keys:
+         - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQOrcpurxLRcOorfTIrwQrcbN/ayQ+CW1ITcKLgcdgbWxf9M4t2flO2I+jku4K0XHyvax0NY5YVL6hQ8WZjrCNI/orPLG3d9h0BUiR5eHmuK4CfhjOn9/7EExYeBRRDebmdh7odmvZYZ2AwcgW8Vcy/LZWk8EHBFmAXyST9Ehh/3attRwRQ+t0bAdK3jUITgzQwxIqqeFre2eqbDrZbfDpC1sPQoU1nluQKUsRgr8JLHM2ekJKheHphL3iEXVdN7sPxpKFMyKqfm8bb4sZ8eb+bRwcxTNWGcLQ4EGX/wK64XCfJRygCjEqIX+lEW7HzUQyGhQzsdJ642yKJZYW9BLN ssh-rsa-for-cml-lab
+      write_files:
+        - path:  /etc/netplan/50-cloud-init.yaml
+          permissions: '0644'
+          content: |
+            network:
+              version: 2
+              ethernets:
+                enp0s2:
+                  addresses: [10.208.253.102/24]
+                  gateway4: 10.208.253.1
+                enp0s3:
+                  addresses: [192.168.1.1/24]
+      runcmd:
+        - [netplan, generate]
+        - [netplan, apply]
+    image_definition: ubuntu-18-04
+    tags: []
+    interfaces:
+      - id: i0
+        slot: 0
+        label: enp0s2
+        type: physical
+      - id: i1
+        slot: 1
+        label: enp0s3
+        type: physical
+      - id: i2
+        slot: 2
+        label: enp0s4
+        type: physical
+      - id: i3
+        slot: 3
+        label: enp0s5
+        type: physical
+      - id: i4
+        slot: 4
+        label: enp0s6
+        type: physical
+  - id: n3
+    label: r2
+    node_definition: iosv
+    x: -350
+    y: -50
+    configuration: |-
+      hostname r2
+      ip domain-name local
+      no ip domain-lookup
+      crypto key generate rsa mod 2048
+      ip ssh version 2
+      aaa new-model
+      enable secret 5 $1$7SW4$u4.Z338MkH5RlDWJ/lWm80
+      username admin secret 5 $1$5E/B$1LqHCkUucq6lCTLqJRRxF0
+      ip vrf management
+      interface GigabitEthernet0/0
+       ip vrf forwarding management
+       ip address 192.168.1.2 255.255.255.0
+       no shutdown
+      line vty 0 4
+       transport input ssh
+       privilege level 15
+      end
+    image_definition: iosv-158-3
+    tags: []
+    interfaces:
+      - id: i0
+        label: Loopback0
+        type: loopback
+      - id: i1
+        slot: 0
+        label: GigabitEthernet0/0
+        type: physical
+      - id: i2
+        slot: 1
+        label: GigabitEthernet0/1
+        type: physical
+      - id: i3
+        slot: 2
+        label: GigabitEthernet0/2
+        type: physical
+      - id: i4
+        slot: 3
+        label: GigabitEthernet0/3
+        type: physical
+  - id: n4
+    label: s5
+    node_definition: nxosv9000
+    x: -250
+    y: 50
+    configuration: |-
+      # minimum needed config to login
+      no password strength-check
+      username admin role network-admin
+      username admin password cisco role network-admin
+      username cisco role network-admin
+      username cisco password cisco role network-admin
+      hostname s5
+      ip domain-name local
+      no ip domain-lookup
+      interface mgmt0
+        vrf member management
+        ip address 192.168.1.5/24
+        no shutdown
+      end
+    image_definition: nxosv9000-9-2-3
+    tags: []
+    interfaces:
+      - id: i0
+        label: Loopback0
+        type: loopback
+      - id: i1
+        slot: 0
+        label: mgmt0
+        type: physical
+      - id: i2
+        slot: 1
+        label: Ethernet1/1
+        type: physical
+      - id: i3
+        slot: 2
+        label: Ethernet1/2
+        type: physical
+      - id: i4
+        slot: 3
+        label: Ethernet1/3
+        type: physical
+  - id: n2
+    label: unmanaged
+    node_definition: unmanaged_switch
+    x: -450
+    y: 0
+    configuration: ''
+    tags: []
+    interfaces:
+      - id: i0
+        slot: 0
+        label: port0
+        type: physical
+      - id: i1
+        slot: 1
+        label: port1
+        type: physical
+      - id: i2
+        slot: 2
+        label: port2
+        type: physical
+      - id: i3
+        slot: 3
+        label: port3
+        type: physical
+      - id: i4
+        slot: 4
+        label: port4
+        type: physical
+      - id: i5
+        slot: 5
+        label: port5
+        type: physical
+      - id: i6
+        slot: 6
+        label: port6
+        type: physical
+      - id: i7
+        slot: 7
+        label: port7
+        type: physical
+  - id: n5
+    label: r4
+    node_definition: iosv
+    x: -350
+    y: 50
+    configuration: |-
+      hostname r4
+      ip domain-name local
+      no ip domain-lookup
+      crypto key generate rsa mod 2048
+      ip ssh version 2
+      aaa new-model
+      enable secret 5 $1$7SW4$u4.Z338MkH5RlDWJ/lWm80
+      username admin secret 5 $1$5E/B$1LqHCkUucq6lCTLqJRRxF0
+      ip vrf management
+      interface GigabitEthernet0/0
+       ip vrf forwarding management
+       ip address 192.168.1.4 255.255.255.0
+       no shutdown
+      line vty 0 4
+       transport input ssh
+       privilege level 15
+      end
+    image_definition: iosv-158-3
+    tags: []
+    interfaces:
+      - id: i0
+        label: Loopback0
+        type: loopback
+      - id: i1
+        slot: 0
+        label: GigabitEthernet0/0
+        type: physical
+      - id: i2
+        slot: 1
+        label: GigabitEthernet0/1
+        type: physical
+      - id: i3
+        slot: 2
+        label: GigabitEthernet0/2
+        type: physical
+      - id: i4
+        slot: 3
+        label: GigabitEthernet0/3
+        type: physical
+  - id: n6
+    label: s3
+    node_definition: nxosv9000
+    x: -250
+    y: -50
+    configuration: |-
+      # minimum needed config to login
+      no password strength-check
+      username admin role network-admin
+      username admin password cisco role network-admin
+      username cisco role network-admin
+      username cisco password cisco role network-admin
+      hostname s3
+      ip domain-name local
+      no ip domain-lookup
+      interface mgmt0
+        vrf member management
+        ip address 192.168.1.3/24
+        no shutdown
+      end
+    image_definition: nxosv9000-9-2-3
+    tags: []
+    interfaces:
+      - id: i0
+        label: Loopback0
+        type: loopback
+      - id: i1
+        slot: 0
+        label: mgmt0
+        type: physical
+      - id: i2
+        slot: 1
+        label: Ethernet1/1
+        type: physical
+      - id: i3
+        slot: 2
+        label: Ethernet1/2
+        type: physical
+      - id: i4
+        slot: 3
+        label: Ethernet1/3
+        type: physical
+links:
+  - id: l0
+    i1: i0
+    n1: n0
+    i2: i0
+    n2: n1
+  - id: l1
+    i1: i0
+    n1: n2
+    i2: i1
+    n2: n1
+  - id: l2
+    i1: i1
+    n1: n2
+    i2: i1
+    n2: n3
+  - id: l3
+    i1: i2
+    n1: n2
+    i2: i1
+    n2: n4
+  - id: l4
+    i1: i1
+    n1: n5
+    i2: i3
+    n2: n2
+  - id: l5
+    i1: i2
+    n1: n3
+    i2: i2
+    n2: n5
+  - id: l6
+    i1: i4
+    n1: n2
+    i2: i1
+    n2: n6
+  - id: l7
+    i1: i2
+    n1: n4
+    i2: i2
+    n2: n6
+  - id: l8
+    i1: i3
+    n1: n3
+    i2: i3
+    n2: n6
+  - id: l9
+    i1: i3
+    n1: n5
+    i2: i3
+    n2: n4

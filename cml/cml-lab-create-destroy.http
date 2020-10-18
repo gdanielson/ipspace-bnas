@@ -1,0 +1,51 @@
+@baseurl =  https://virl/api/v0
+@lab_title = basic-lab
+@lab_file = {{lab_title}}.yaml
+
+########## ###       --- authenticate to CML
+# @name login
+POST {{baseurl}}/authenticate
+content-type: application/json
+
+//  Start VSCode with CML_PASS env var: `CML_PASS=password code .`
+{
+  "username": "admin",
+  "password": "{{$processEnv CML_PASS}}"
+}
+
+
+###                      --- list current labs
+@authToken = {{login.response.body.$}}
+GET {{baseurl}}/labs
+Authorization: Bearer {{authToken}}
+
+###                      --- create lab
+# @name create_lab
+POST {{baseurl}}/import?title={{lab_title}}
+Authorization: Bearer {{authToken}}
+
+<@ ./{{lab_file}}
+
+###                      --- start lab
+@lab_id = {{create_lab.response.body.id}}
+PUT {{baseurl}}/labs/{{lab_id}}/start
+Authorization: Bearer {{authToken}}
+
+###                      --- status of lab
+GET {{baseurl}}/labs/{{lab_id}}
+Authorization: Bearer {{authToken}}
+
+
+
+
+###                      --- stop lab
+PUT {{baseurl}}/labs/{{lab_id}}/stop
+Authorization: Bearer {{authToken}}
+
+###                      --- wipe lab
+PUT {{baseurl}}/labs/{{lab_id}}/wipe
+Authorization: Bearer {{authToken}}
+
+###                      --- delete lab
+DELETE {{baseurl}}/labs/{{lab_id}}
+Authorization: Bearer {{authToken}}
